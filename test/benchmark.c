@@ -23,6 +23,7 @@ pcg32(uint64_t *s)
     return *s >> shift;
 }
 
+/* Generate a random codepoint whose UTF-8 length is uniformly selected. */
 static long
 randchar(uint64_t *s)
 {
@@ -51,6 +52,9 @@ alarm_handler(int signum)
     running = 0;
 }
 
+/* Fill buffer with random characters, with evenly-distributed encoded
+ * lengths.
+ */
 static void *
 buffer_fill(void *buf, size_t z)
 {

@@ -46,11 +46,11 @@ utf8_decode(void *buf, long *c, int *e) {
     *c >>= shiftc[len];
 
     *e  = (*c < (1L << thresholds[len]) - 1) << 6;
-    *e |= ((*c >> 11) == 0x1b) << 7;
+    *e |= ((*c >> 11) == 0x1b) << 7;  // surrogate half?
     *e |= (s[1] & 0xc0U) >> 2;
     *e |= (s[2] & 0xc0U) >> 4;
     *e |= (s[3]        ) >> 6;
-    *e ^= 0x2aU;
+    *e ^= 0x2aU; // top two bits of each tail byte correct?
     *e >>= shifte[len];
 
     return s + len;
