@@ -23,7 +23,7 @@ main(void)
     /* Make sure it can decode every character */
     {
         long failures = 0;
-        for (long i = 0; i < 0x10000L; i++) {
+        for (long i = 0; i < 0x1ffffL; i++) {
             if (!IS_SURROGATE(i)) {
                 int e;
                 long c;
@@ -39,7 +39,7 @@ main(void)
     /* Does it reject all surrogate halves? */
     {
         long failures = 0;
-        for (long i = 0xD800; i <= 0xDFFFU; i++) {
+        for (long i = 0xd800; i <= 0xdfff; i++) {
             int e;
             long c;
             unsigned char buf[8] = {0};
@@ -74,12 +74,26 @@ main(void)
 
     /* Let's try some bogus byte sequences */
     {
-        int e;
+        int len, e;
         long c;
 
-        unsigned char buf[4] = {0xff};
-        int len = (unsigned char *)utf8_decode(buf, &c, &e) - buf;
-        TEST(e, "bogus ff 00 00 00, 0x%02x, U+%04lx, len=%d", e, c, len);
+        /* Invalid first byte */
+        unsigned char buf0[4] = {0xff};
+        len = (unsigned char *)utf8_decode(buf0, &c, &e) - buf0;
+        TEST(e, "bogus [ff] 0x%02x U+%04lx", e, c);
+        TEST(len == 1, "bogus [ff] recovery %d", len);
+
+        /* Invalid first byte */
+        unsigned char buf1[4] = {0x80};
+        len = (unsigned char *)utf8_decode(buf1, &c, &e) - buf1;
+        TEST(e, "bogus [80] 0x%02x U+%04lx", e, c);
+        TEST(len == 1, "bogus [80] recovery %d", len);
+
+        /* Looks like a two-byte sequence but second byte is wrong */
+        unsigned char buf2[4] = {0xc0, 0x0a};
+        len = (unsigned char *)utf8_decode(buf2, &c, &e) - buf2;
+        TEST(e, "bogus [c0 0a] 0x%02x U+%04lx", e, c);
+        TEST(len == 2, "bogus [c0 0a] recovery %d", len);
     }
 
     printf("%d fail, %d pass\n", count_fail, count_pass);
