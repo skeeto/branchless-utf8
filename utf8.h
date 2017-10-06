@@ -1,5 +1,4 @@
 /* Branchless UTF-8 decoder
- * Chris Wellons
  *
  * This is free and unencumbered software released into the public domain.
  */
@@ -23,18 +22,10 @@ utf8_decode(void *buf, long *c, int *e) {
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0
     };
-    static const unsigned char masks[] = {
-        0x00, 0x7f, 0x1f, 0x0f, 0x07
-    };
-    static const char thresholds[] = {
-        22, 0, 7, 11, 16
-    };
-    static const char shiftc[] = {
-        0, 18, 12, 6, 0
-    };
-    static const char shifte[] = {
-        0, 6, 4, 2, 0
-    };
+    static const int masks[]  = {0x00, 0x7f, 0x1f, 0x0f, 0x07};
+    static const int thresh[] = {22, 0, 7, 11, 16};
+    static const int shiftc[] = {0, 18, 12, 6, 0};
+    static const int shifte[] = {0, 6, 4, 2, 0};
 
     unsigned char *s = buf;
     int len = utf8_lengths[s[0] >> 3];
@@ -45,7 +36,7 @@ utf8_decode(void *buf, long *c, int *e) {
     *c |= (s[3] & 0x3fU) <<  0;
     *c >>= shiftc[len];
 
-    *e  = (*c < (1L << thresholds[len]) - 1) << 6;
+    *e  = (*c < (1L << thresh[len]) - 1) << 6;
     *e |= ((*c >> 11) == 0x1b) << 7;  // surrogate half?
     *e |= (s[1] & 0xc0U) >> 2;
     *e |= (s[2] & 0xc0U) >> 4;
