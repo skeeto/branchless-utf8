@@ -8,7 +8,7 @@
 
 #include "../utf8.h"
 #include "utf8-encode.h"
-#include "bj-utf8.h"
+#include "bh-utf8.h"
 
 #define SECONDS 5
 #define BUFLEN  64 // MB
