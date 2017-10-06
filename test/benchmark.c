@@ -71,7 +71,7 @@ int
 main(void)
 {
     long errors, n;
-    size_t z = BUFLEN * 1024 * 1024;
+    size_t z = BUFLEN * 1024L * 1024;
     unsigned char *buffer = malloc(z);
     unsigned char *end = buffer_fill(buffer, z);
 
@@ -87,10 +87,10 @@ main(void)
         long count = 0;
         while (p < end) {
             p = utf8_decode(p, &c, &e);
+            errors += !!e;  // force errors to be checked
             count++;
         }
-        errors += !!e;
-        if (p == end)
+        if (p == end) // reached the end successfully?
             n++;
     } while (running);
 
@@ -107,11 +107,13 @@ main(void)
         uint32_t c;
         uint32_t state = 0;
         long count = 0;
-        for (; p < end; p++)
-            if (!bj_utf8_decode(&state, &c, *p))
+        for (; p < end; p++) {
+            if (!bh_utf8_decode(&state, &c, *p))
                 count++;
-        errors += state != UTF8_ACCEPT;
-        if (p == end)
+            else if (state == UTF8_REJECT)
+                errors++;  // force errors to be checked
+        }
+        if (p == end) // reached the end successfully?
             n++;
     } while (running);
 
