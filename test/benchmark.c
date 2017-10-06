@@ -87,7 +87,7 @@ main(void)
     do {
         unsigned char *p = buffer;
         int e = 0;
-        long c;
+        uint32_t c;
         long count = 0;
         while (p < end) {
             p = utf8_decode(p, &c, &e);
