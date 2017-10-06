@@ -53,7 +53,7 @@ utf8_decode(void *buf, long *c, int *e) {
     *e ^= 0x2aU; // top two bits of each tail byte correct?
     *e >>= shifte[len];
 
-    return s + len;
+    return s + len + !len;
 }
 
 #endif
