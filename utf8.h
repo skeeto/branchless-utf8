@@ -25,7 +25,7 @@ utf8_decode(void *buf, uint32_t *c, int *e) {
         0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0
     };
     static const int masks[]  = {0x00, 0x7f, 0x1f, 0x0f, 0x07};
-    static const int thresh[] = {22, 0, 7, 11, 16};
+    static const uint32_t thresh[] = {4194304, 0, 128, 2048, 65536};
     static const int shiftc[] = {0, 18, 12, 6, 0};
     static const int shifte[] = {0, 6, 4, 2, 0};
 
@@ -48,7 +48,7 @@ utf8_decode(void *buf, uint32_t *c, int *e) {
     *c >>= shiftc[len];
 
     /* Accumulate the various error conditions. */
-    *e  = (*c < (UINT32_C(1) << thresh[len]) - 1) << 6;
+    *e  = (*c < thresh[len]) << 6;
     *e |= ((*c >> 11) == 0x1b) << 7;  // surrogate half?
     *e |= (s[1] & 0xc0) >> 2;
     *e |= (s[2] & 0xc0) >> 4;
