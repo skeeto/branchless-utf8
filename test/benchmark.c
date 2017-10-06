@@ -10,8 +10,8 @@
 #include "utf8-encode.h"
 #include "bh-utf8.h"
 
-#define SECONDS 5
-#define BUFLEN  64 // MB
+#define SECONDS 6
+#define BUFLEN  8 // MB
 
 static uint32_t
 pcg32(uint64_t *s)
@@ -99,7 +99,7 @@ main(void)
     } while (running);
 
     double rate = n * (end - buffer) / (double)SECONDS / 1024 / 1024;
-    printf("branchless: %f MB/s, %ld rounds, %ld errors\n", rate, n, errors);
+    printf("branchless: %f MB/s, %ld errors\n", rate, errors);
 
     /* Benchmark Bjoern Hoehrmann's decoder */
     running = 1;
@@ -122,7 +122,7 @@ main(void)
     } while (running);
 
     rate = n * (end - buffer) / (double)SECONDS / 1024 / 1024;
-    printf("Hoehrmann:  %f MB/s, %ld rounds, %ld errors\n", rate, n, errors);
+    printf("Hoehrmann:  %f MB/s, %ld errors\n", rate, errors);
 
     free(buffer);
 }

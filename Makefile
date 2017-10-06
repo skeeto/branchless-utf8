@@ -1,5 +1,5 @@
 CC = c99
-CFLAGS = -Wall -Wextra -O3 -g3
+CFLAGS = -Wall -Wextra -O3 -g3 -march=native
 all: benchmark tests
 
 benchmark: test/benchmark.c utf8.h test/utf8-encode.h test/bh-utf8.h
