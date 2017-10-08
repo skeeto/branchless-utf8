@@ -118,7 +118,7 @@ main(void)
     long errors, n;
     size_t z = BUFLEN * 1024L * 1024;
     unsigned char *buffer = malloc(z);
-    unsigned char *end = buffer_fill(buffer, z);
+    unsigned char *end = buffer_fill(buffer, z - 4);
 
     /* Benchmark the branchless decoder */
     running = 1;
