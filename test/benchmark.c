@@ -111,6 +111,40 @@ utf8_simple(unsigned char *s, long *c)
     return next;
 }
 
+static long
+GetChar(unsigned char *Buf, size_t *Offset)
+{   long Result = 0;
+
+    if ((Buf [*Offset] & 0x80) == 0) {
+        Result = Buf [*Offset];
+        ++*Offset;
+        return Result;
+    }
+
+    if ((Buf [*Offset] & 0xE0) == 0xC0 && (Buf [*Offset + 1] & 0xC0) == 0x80) {
+        Result = ((Buf [*Offset] & 0x1F) << 6) | (Buf [*Offset + 1] & 0x3F);
+        *Offset += 2;
+        return Result;
+    }
+
+    if ((Buf [*Offset] & 0xF0) == 0xE0 && (Buf [*Offset + 1] & 0xC0) == 0x80 && (Buf [*Offset + 2] & 0xC0) == 0x80) {
+        Result = ((Buf [*Offset] & 0x0F) << 12) | ((Buf [*Offset + 1] & 0x3F) << 6) | (Buf [*Offset + 2] & 0x3F);
+        *Offset += 3;
+        return Result;
+    }
+
+    if ((Buf [*Offset] & 0xF8) == 0xF0 && (Buf [*Offset + 1] & 0xC0) == 0x80 && (Buf [*Offset + 2] & 0xC0) == 0x80 && (Buf [*Offset + 3] & 0xC0) == 0x80) {
+        Result = ((Buf [*Offset] & 0x07) << 18) | ((Buf [*Offset + 1] & 0x3F) << 12) | ((Buf [*Offset + 2] & 0x3F) << 6) | (Buf [*Offset + 3] & 0x3F);
+        *Offset += 4;
+        return Result;
+    }
+
+    // Not a correctly encoded character; return the replacement character.
+
+    ++*Offset;
+    return -1;
+}
+
 int
 main(void)
 {
@@ -119,6 +153,26 @@ main(void)
     size_t z = BUFLEN * 1024L * 1024;
     unsigned char *buffer = malloc(z);
     unsigned char *end = buffer_fill(buffer, z);
+
+    /* Benchmark johannes1971 decoder */
+    running = 1;
+    signal(SIGALRM, alarm_handler);
+    alarm(SECONDS);
+    errors = n = 0;
+    do {
+        long count = 0;
+        size_t offset = 0;
+        while (buffer + offset < end) {
+            long c = GetChar(buffer, &offset);
+            count++;
+            if (c == -1)
+                errors++;
+        }
+        if (buffer + offset == end) // reached the end successfully?
+            n++;
+    } while (running);
+    rate = n * (end - buffer) / (double)SECONDS / 1024 / 1024;
+    printf("johannes1971: %f MB/s, %ld errors\n", rate, errors);
 
     /* Benchmark the branchless decoder */
     running = 1;
