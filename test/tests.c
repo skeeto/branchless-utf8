@@ -23,7 +23,7 @@ main(void)
     /* Make sure it can decode every character */
     {
         long failures = 0;
-        for (unsigned long i = 0; i < 0x1ffff; i++) {
+        for (unsigned long i = 0; i < 0x10ffff; i++) {
             if (!IS_SURROGATE(i)) {
                 int e;
                 uint32_t c;
@@ -35,6 +35,22 @@ main(void)
         }
         TEST(failures == 0, "decode all, errors: %ld", failures);
     }
+
+    /* Reject everything outside of U+0000..U+10FFFF */
+    {
+        long failures = 0;
+        for (unsigned long i = 0x110000; i < 0x1fffff; i++) {
+            int e;
+            uint32_t c;
+            unsigned char buf[8] = {0};
+            utf8_encode(buf, i);
+            unsigned char *end = utf8_decode(buf, &c, &e);
+            failures += !e;
+            failures += end - buf != 4;
+        }
+        TEST(failures == 0, "out of range, errors: %ld", failures);
+    }
+
 
     /* Does it reject all surrogate halves? */
     {
