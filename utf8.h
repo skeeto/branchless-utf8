@@ -23,7 +23,7 @@
  * error, but it will always advance at least one byte.
  */
 static void *
-utf8_decode(void *buf, uint32_t *c, int *e)
+utf8_decode(void *__restrict__ buf, uint32_t *__restrict__ c, int *__restrict__ e)
 {
     static const char lengths[] = {
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
