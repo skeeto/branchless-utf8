@@ -29,6 +29,10 @@ utf8_decode(void *buf, uint32_t *c, int *e)
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 4, 0
     };
+    static const char err_extras[] = {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1
+    };
     static const int masks[]  = {0x00, 0x7f, 0x1f, 0x0f, 0x07};
     static const uint32_t mins[] = {4194304, 0, 128, 2048, 65536};
     static const int shiftc[] = {0, 18, 12, 6, 0};
@@ -36,12 +40,13 @@ utf8_decode(void *buf, uint32_t *c, int *e)
 
     unsigned char *s = buf;
     int len = lengths[s[0] >> 3];
+    int err_extra_len = err_extras[s[0] >> 3];
 
     /* Compute the pointer to the next character early so that the next
      * iteration can start working on the next character. Neither Clang
      * nor GCC figure out this reordering on their own.
      */
-    unsigned char *next = s + len + !len;
+    unsigned char *next = s + len + err_extra_len;
 
     /* Assume a four-byte character and load four bytes. Unused bits are
      * shifted out.
